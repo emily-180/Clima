@@ -1,35 +1,38 @@
-import { useState } from 'react'
-import reactLogo from './assets/react.svg'
-import viteLogo from '/vite.svg'
-import './App.css'
+import { useState, useEffect } from 'react';
 
 function App() {
-  const [count, setCount] = useState(0)
+  const [previsao, setPrevisao] = useState(null);
+
+  useEffect(() => {
+    fetch('http://localhost:8080/api/clima/previsao/3040')
+      .then(response => response.json())
+      .then(data => {
+        console.log('Dados recebidos:', data); 
+        setPrevisao(data);
+      })
+      .catch(error => console.error('Erro ao buscar previsão:', error));
+  }, []);
 
   return (
-    <>
-      <div>
-        <a href="https://vite.dev" target="_blank">
-          <img src={viteLogo} className="logo" alt="Vite logo" />
-        </a>
-        <a href="https://react.dev" target="_blank">
-          <img src={reactLogo} className="logo react" alt="React logo" />
-        </a>
-      </div>
-      <h1>Vite + React</h1>
-      <div className="card">
-        <button onClick={() => setCount((count) => count + 1)}>
-          count is {count}
-        </button>
-        <p>
-          Edit <code>src/App.jsx</code> and save to test HMR
-        </p>
-      </div>
-      <p className="read-the-docs">
-        Click on the Vite and React logos to learn more
-      </p>
-    </>
-  )
-}
+    <div style={{ padding: "2rem", fontFamily: "sans-serif" }}>
+      <h1>Previsão do Tempo</h1>
+      {previsao ? (
+        <div>
+          <h2>{previsao.nome} - {previsao.uf}</h2>
+          <p>Última atualização: {previsao.atualizacao}</p>
+          <ul>
+            {previsao.previsoes.map((dia, index) => (
+              <li key={index}>
+                Dia: {dia.dia} | Máx: {dia.maxima}°C | Mín: {dia.minima}°C | Tempo: {dia.tempo}
+              </li>
+            ))}
+          </ul>
+        </div>
+      ) : (
+        <p>Carregando informações...</p>
+      )}
+    </div>
+  );
+} 
 
-export default App
+export default App;

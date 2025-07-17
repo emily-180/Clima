@@ -1,7 +1,6 @@
 import { useState } from 'react';
 import './App.css';
 
-// Importando ícones do react-icons (FontAwesome)
 import { 
   FaCloudSun, FaCloudRain, FaSun, FaBolt, FaSnowflake, FaCloud, FaCloudShowersHeavy,
   FaCloudMoon, FaSmog, FaCloudMoonRain 
@@ -53,7 +52,6 @@ function App() {
     return dias[data.getDay()];
   }
 
-  // Traduz as siglas do tempo para descrição
   const traduzTempo = (sigla) => {
     const tabela = {
       ec: "Encoberto c/ Chuvas Isoladas",
@@ -100,13 +98,12 @@ function App() {
     return tabela[sigla] || sigla;
   };
 
-  // Retorna o ícone baseado na sigla do tempo
   const iconeDoTempo = (sigla) => {
     switch(sigla) {
       case 'ec': return <FaCloudShowersHeavy />;
       case 'ci': return <FaCloudRain />;
       case 'c': return <FaCloudRain />;
-      case 'in': return <FaSmog />; // instável, use smog
+      case 'in': return <FaSmog />; 
       case 'pp': return <FaCloudShowersHeavy />;
       case 'cm': return <FaCloudSun />;
       case 'cn': return <FaCloudMoonRain />;
@@ -153,9 +150,35 @@ function App() {
     return `${dia.toString().padStart(2, '0')}/${mes.toString().padStart(2, '0')}`;
   };
 
+  const tempoHoje = previsao?.previsoes?.[0]?.tempo;
+
+  const obterClasseFundo = (sigla) => {
+    const sol = ['ps', 'cl'];
+    const parcialmenteNublado = ['pn', 'vn'];
+    const nublado = ['n', 'e', 'ec', 'in'];
+    const chuvaFraca = ['ci', 'pp', 'pc', 'pt', 'pm', 'pnt', 'ppn', 'ppt', 'ppm', 'psc', 'pcm', 'pct', 'pcn', 'ct'];
+    const chuvaForte = ['c', 'ch', 'cm', 'cn', 'np', 'npm', 'npt', 'npn'];
+    const tempestade = ['t'];
+    const neblina = ['nv', 'npp', 'ncm', 'nct', 'ncn'];
+    const neve = ['g', 'ne'];
+
+    if (sol.includes(sigla)) return 'fundo-ceuLimpo';
+    if (parcialmenteNublado.includes(sigla)) return 'fundo-parcialmenteNublado';
+    if (nublado.includes(sigla)) return 'fundo-nublado';
+    if (chuvaFraca.includes(sigla)) return 'fundo-chuvaFraca';
+    if (chuvaForte.includes(sigla)) return 'fundo-chuvaForte';
+    if (tempestade.includes(sigla)) return 'fundo-tempestade';
+    if (neblina.includes(sigla)) return 'fundo-neblina';
+    if (neve.includes(sigla)) return 'fundo-neve';
+
+    return 'fundo-ceuLimpo'; // padrão
+  };
+
+  const classeFundo = tempoHoje ? obterClasseFundo(tempoHoje) : 'fundo-ceuLimpo';
+
 
   return (
-    <div className="app-container">
+   <div className={`app-container ${classeFundo}`}>
       <div className="header-fixo">
         <h1>Previsão do Tempo</h1>
         <div className="search-box">
@@ -169,30 +192,28 @@ function App() {
         </div>
       </div>
 
-      {erro && <p className="error">{erro}</p>}
+      {erro && <div className="error">{erro}</div>}
 
       {previsao && (
         <div className="previsao-container">
-          <h2>{previsao.nome} - {previsao.uf}</h2>
 
           {previsao.previsoes.length > 0 && (
             <div className="previsao-hoje">
-              <p>Hoje</p>
-              <p>{iconeDoTempo(previsao.previsoes[0].tempo)} {traduzTempo(previsao.previsoes[0].tempo)}</p>
-              <div className="temp-inline">
-                <p>Máx: {previsao.previsoes[0].maxima}°C</p>
-                <p>Mín: {previsao.previsoes[0].minima}°C</p>
-              </div>
+              <h4>Hoje</h4>
+              <h4>Máx: {previsao.previsoes[0].maxima}°C   |   Mín: {previsao.previsoes[0].minima}°C</h4>
+              <h1>{previsao.nome} - {previsao.uf}</h1>
+              <h2>{iconeDoTempo(previsao.previsoes[0].tempo)} {traduzTempo(previsao.previsoes[0].tempo)}</h2>
             </div>
           )}
 
-          <p>Atualizado em: {formatarData(previsao.atualizacao)}</p>
+         
 
           <div className="cards">
             {previsao.previsoes.map((dia, index) => (
-              <div key={index} className="card">
+               <div key={index} className="card">
                 <h3>{nomeDoDia(dia.dia)} - {formatarData(dia.dia)}</h3>
-                <p>{iconeDoTempo(dia.tempo)} {traduzTempo(dia.tempo)}</p>
+                <div className="icone">{iconeDoTempo(dia.tempo)}</div>
+                <p>{traduzTempo(dia.tempo)}</p>
                 <p>Máx: {dia.maxima}°C</p>
                 <p>Mín: {dia.minima}°C</p>
               </div>
